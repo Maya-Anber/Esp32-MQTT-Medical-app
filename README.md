@@ -41,27 +41,22 @@ This project is an IoT-based healthcare monitoring system using an ESP32 microco
 
 ## Installation and Setup
 
-1. **Clone the Repository:**
-   ```bash
-   git clone https://github.com/yourusername/IoT-Healthcare-Monitoring-System.git
-   ```
-
-2. **Install Required Libraries:**
+1. **Install Required Libraries:**
    Ensure you have the required libraries installed in your Arduino IDE. Use the Library Manager to install them.
 
-3. **Hardware Setup:**
+2. **Hardware Setup:**
    - Connect the sensors to the ESP32 according to the pin definitions provided in the code.
    - Connect the I2C LCD to the appropriate I2C pins (SDA to GPIO 21, SCL to GPIO 22).
    - Connect the servo motor to GPIO 26.
 
-4. **Configure WiFi and MQTT:**
+3. **Configure WiFi and MQTT:**
    Update the `ssid`, `pass`, `mqtt_server`, `mqtt_username`, `mqtt_password`, and `mqtt_port` variables in the code with your WiFi credentials and HiveMQ Cloud broker settings.
 
-5. **Upload the Code:**
+4. **Upload the Code:**
    - Connect your ESP32 to the computer via USB.
    - Open the Arduino IDE, select the correct board and port, and upload the code.
 
-6. **Monitor Output:**
+5. **Monitor Output:**
    - Open the Serial Monitor at 9600 baud to view debug information.
    - The LCD will display sensor readings and classifications.
    - Data will be sent to HiveMQ Cloud, and you can control the servo motor via MQTT messages.
