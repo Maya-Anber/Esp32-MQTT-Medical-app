@@ -1,6 +1,3 @@
-# Esp32-MQTT-Medical-app
-### README
-
 # IoT Healthcare Monitoring System
 
 This project is an IoT-based healthcare monitoring system using an ESP32 microcontroller. It measures various health parameters such as temperature, ECG, pressure, and SpO2 levels, and then sends these readings to the cloud using MQTT. The system also includes a servo motor, LEDs, and a buzzer for visual and auditory alerts based on the readings.
