@@ -24,13 +24,13 @@ PulseOximeter pox; // Pulse Oximeter MAX30100 object
 Servo servo;  // Servo control object
 
 // WiFi credentials
-char ssid[] = "WE_B8E5C4";
-char pass[] = "m3g05986";
+char ssid[] = "";
+char pass[] = "";
 
 //---- HiveMQ Cloud Broker settings
-const char* mqtt_server = "33c9cc1b359241a4a730c3a84f7222bc.s1.eu.hivemq.cloud";
-const char* mqtt_username = "Maya Mahmoud";
-const char* mqtt_password = "Maya1234";
+const char* mqtt_server = ".s1.eu.hivemq.cloud";
+const char* mqtt_username = "Maya";
+const char* mqtt_password = "";
 const int mqtt_port = 8883;
 
 WiFiClientSecure espClient;  
