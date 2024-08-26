@@ -236,15 +236,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   // Control the servo based on the received MQTT message
   if (String(topic) == "servo/control") {
-    int angle = message.toInt(); // Convert the message to an integer
-    if (angle >= 0 && angle <= 180) { // Ensure angle is within valid range
-      servo.write(angle); // Set the servo to the specified angle
-      Serial.print("Servo set to angle: ");
-      Serial.println(angle);
+    if (message == "OPEN") {
+      servo.write(90); // Set the servo to 90 degrees for OPEN
+      Serial.println("Servo set to 90 degrees (OPEN)");
+    } else if (message == "CLOSED") {
+      servo.write(180); // Set the servo to 180 degrees for CLOSED
+      Serial.println("Servo set to 180 degrees (CLOSED)");
     }
   }
 }
-
 
 void reconnect() {
   // Loop until we’re reconnected
