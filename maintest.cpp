@@ -239,7 +239,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // Control the servo based on the received MQTT message
   if (String(topic) == "servo/control") {
     if (message == "OPEN") {
-      servo.write(0); // Set the servo to 90 degrees for OPEN
+      servo.write(90); // Set the servo to 90 degrees for OPEN
       Serial.println("Servo set to 90 degrees (OPEN)");
     } else if (message == "CLOSED") {
       servo.write(180); // Set the servo to 180 degrees for CLOSED
@@ -340,7 +340,7 @@ flag == 0
     }
   } else {
      if (flag == 0) {
-        client.publish("ESP32/irSensor", "true");
+        client.publish("ESP32/irSensor", "false");
         flag = 1; 
       }
     // Display when no human is detected
