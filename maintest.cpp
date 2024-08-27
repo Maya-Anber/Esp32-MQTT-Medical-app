@@ -73,6 +73,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 
 unsigned long lastMsg = 0;
 int value = 0;
+    int flag=0;
 // Global Variables for Display and Timing
 unsigned long previousMillis = 0; // Store last update time
 const long interval = 5000; // Interval between sensor readings (5 seconds)
@@ -115,7 +116,7 @@ void triggerAlert() {
 
 // Function to display sensor data
 void displaySensorData(int mode) {
-  client.publish("ESP32/irSensor", String('true').c_str());
+  client.publish("ESP32/irSensor", 'true');
   float temperature = sensors.getTempCByIndex(0);
   float ecgValue = analogRead(ECG_PIN);
   float pressureValue = analogRead(PRESSURE_PIN);
@@ -330,7 +331,7 @@ void loop() {
       if (humanDetected) {
     unsigned long currentMillis = millis();
     static int displayMode = 0;
-
+flag == 0
     // Cycle through sensor readings
     if (currentMillis - previousMillis >= interval) {
       previousMillis = currentMillis;
@@ -338,6 +339,10 @@ void loop() {
       displayMode = (displayMode + 1) % 4;
     }
   } else {
+     if (flag == 0) {
+        client.publish("ESP32/irSensor", "true");
+        flag = 1; 
+      }
     // Display when no human is detected
     lcd.setCursor(0, 0);
     lcd.print("No human detected");
