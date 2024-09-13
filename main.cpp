@@ -108,7 +108,7 @@ void triggerAlert() {
 
   delay(500); // Buzzer alert for 500 milliseconds
   digitalWrite(BUZZER_PIN, LOW);
-  
+
   delay(120000); // Keep servo open for 2 minutes
   servo.write(0);  // Move servo back to 0 degrees
 }
@@ -126,7 +126,7 @@ void displaySensorData(int mode) {
   if (heartRate <= 0) heartRate = 0;
 
   lcd.clear();
-  
+
   String classification;
 
   switch (mode) {
@@ -142,7 +142,6 @@ void displaySensorData(int mode) {
       lcd.setCursor(0, 1);
       lcd.print("Class: ");
       lcd.print(classification);
-      servo.write(45);  // Move servo to 45 degrees for temperature
       client.publish("ESP32/temperature", String(temperature).c_str());
       break;
 
@@ -154,7 +153,6 @@ void displaySensorData(int mode) {
       lcd.setCursor(0, 1);
       lcd.print("Class: ");
       lcd.print(classification);
-      servo.write(90);  // Move servo to 90 degrees for ECG
       client.publish("ESP32/ecg", String(ecgValue).c_str());
       break;
 
@@ -167,7 +165,6 @@ void displaySensorData(int mode) {
       lcd.setCursor(0, 1);
       lcd.print("Class: ");
       lcd.print(classification);
-      servo.write(135); // Move servo to 135 degrees for pressure
       client.publish("ESP32/pressure", String(pressureValue).c_str());
       break;
 
@@ -180,7 +177,6 @@ void displaySensorData(int mode) {
       lcd.setCursor(0, 1);
       lcd.print("HR: ");
       lcd.print(heartRate);
-      servo.write(180); // Move servo to 180 degrees for SpO2
       client.publish("ESP32/heartRate", String(heartRate).c_str());
       client.publish("ESP32/spO2", String(spO2).c_str());
       break;
@@ -226,7 +222,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-  
+
   String message;
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
@@ -236,15 +232,15 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   // Control the servo based on the received MQTT message
   if (String(topic) == "servo/control") {
-    if (message == "OPEN") {
-      servo.write(90); // Set the servo to 90 degrees for OPEN
-      Serial.println("Servo set to 90 degrees (OPEN)");
-    } else if (message == "CLOSED") {
-      servo.write(180); // Set the servo to 180 degrees for CLOSED
-      Serial.println("Servo set to 180 degrees (CLOSED)");
+    int angle = message.toInt(); // Convert the message to an integer
+    if (angle >= 0 && angle <= 180) { // Ensure angle is within valid range
+      servo.write(angle); // Set the servo to the specified angle
+      Serial.print("Servo set to angle: ");
+      Serial.println(angle);
     }
   }
 }
+
 
 void reconnect() {
   // Loop until we’re reconnected
@@ -276,7 +272,7 @@ void setup() {
   espClient.setCACert(root_ca);
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-  
+
 
   // Initialize I2C for LCD and MAX30100
   Wire.begin(21, 22);
@@ -348,7 +344,6 @@ void loop() {
     digitalWrite(GREEN_LED_PIN, LOW);
     digitalWrite(RED_LED_PIN, LOW);
     digitalWrite(BUZZER_PIN, LOW);
-    servo.write(0);
   }
   }
 }
