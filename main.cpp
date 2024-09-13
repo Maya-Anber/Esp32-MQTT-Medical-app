@@ -24,13 +24,13 @@ PulseOximeter pox; // Pulse Oximeter MAX30100 object
 Servo servo;  // Servo control object
 
 // WiFi credentials
-char ssid[] = "";
-char pass[] = "";
+char ssid[] = "OPPO A9 2020";
+char pass[] = "88888888";
 
 //---- HiveMQ Cloud Broker settings
-const char* mqtt_server = ".s1.eu.hivemq.cloud";
-const char* mqtt_username = "";
-const char* mqtt_password = "";
+const char* mqtt_server = "33c9cc1b359241a4a730c3a84f7222bc.s1.eu.hivemq.cloud";
+const char* mqtt_username = "Maya Mahmoud";
+const char* mqtt_password = "Maya2004";
 const int mqtt_port = 8883;
 
 WiFiClientSecure espClient;  
@@ -73,6 +73,7 @@ emyPxgcYxn/eR44/KJ4EBs+lVDR3veyJm+kXQ99b21/+jh5Xos1AnX5iItreGCc=
 
 unsigned long lastMsg = 0;
 int value = 0;
+    int flag=0;
 // Global Variables for Display and Timing
 unsigned long previousMillis = 0; // Store last update time
 const long interval = 5000; // Interval between sensor readings (5 seconds)
@@ -108,13 +109,14 @@ void triggerAlert() {
 
   delay(500); // Buzzer alert for 500 milliseconds
   digitalWrite(BUZZER_PIN, LOW);
-
+  
   delay(120000); // Keep servo open for 2 minutes
   servo.write(0);  // Move servo back to 0 degrees
 }
 
 // Function to display sensor data
 void displaySensorData(int mode) {
+  client.publish("ESP32/irSensor", "true");
   float temperature = sensors.getTempCByIndex(0);
   float ecgValue = analogRead(ECG_PIN);
   float pressureValue = analogRead(PRESSURE_PIN);
@@ -126,7 +128,7 @@ void displaySensorData(int mode) {
   if (heartRate <= 0) heartRate = 0;
 
   lcd.clear();
-
+  
   String classification;
 
   switch (mode) {
@@ -178,7 +180,7 @@ void displaySensorData(int mode) {
       lcd.print("HR: ");
       lcd.print(heartRate);
       client.publish("ESP32/heartRate", String(heartRate).c_str());
-      client.publish("ESP32/spO2", String(spO2).c_str());
+      client.publish("ESP32/oxygen", String(spO2).c_str());
       break;
   }
 
@@ -222,7 +224,7 @@ void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
-
+  
   String message;
   for (int i = 0; i < length; i++) {
     Serial.print((char)payload[i]);
@@ -230,17 +232,17 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
   Serial.println();
 
-  // Control the servo based on the received MQTT message
+// Control the servo based on the received MQTT message
   if (String(topic) == "servo/control") {
-    int angle = message.toInt(); // Convert the message to an integer
-    if (angle >= 0 && angle <= 180) { // Ensure angle is within valid range
-      servo.write(angle); // Set the servo to the specified angle
-      Serial.print("Servo set to angle: ");
-      Serial.println(angle);
+    if (message == "OPEN") {
+      servo.write(90); // Set the servo to 90 degrees for OPEN
+      Serial.println("Servo set to 90 degrees (OPEN)");
+    } else if (message == "CLOSED") {
+      servo.write(0); // Set the servo to 0 degrees for CLOSED
+      Serial.println("Servo set to 0 degrees (CLOSED)");
     }
   }
 }
-
 
 void reconnect() {
   // Loop until we’re reconnected
@@ -272,7 +274,7 @@ void setup() {
   espClient.setCACert(root_ca);
   client.setServer(mqtt_server, mqtt_port);
   client.setCallback(callback);
-
+  
 
   // Initialize I2C for LCD and MAX30100
   Wire.begin(21, 22);
@@ -308,6 +310,7 @@ void setup() {
   pox.setIRLedCurrent(MAX30100_LED_CURR_7_6MA);
   pox.setOnBeatDetectedCallback(onBeatDetected);
 }
+bool previousHumanDetected = false; // Track the previous state of human detection
 
 void loop() {
   if (!client.connected()) {
@@ -315,35 +318,47 @@ void loop() {
   }
   client.loop();
 
+
+
   unsigned long now = millis();
   if (now - lastMsg > 1000) {
-  pox.update();
+    pox.update();
+   
 
-  // Human detection via IR sensor
-  bool humanDetected = digitalRead(IR_SENSOR_PIN) == LOW;
+    // Human detection via IR sensor
+    bool humanDetected = digitalRead(IR_SENSOR_PIN) == LOW;
 
+    if (humanDetected != previousHumanDetected) {
+      // Publish the new state only if it has changed
       if (humanDetected) {
-    unsigned long currentMillis = millis();
-    static int displayMode = 0;
-    client.publish("ESP32/irSensor", String(true).c_str());
-
-    // Cycle through sensor readings
-    if (currentMillis - previousMillis >= interval) {
-      previousMillis = currentMillis;
-      displaySensorData(displayMode);
-      displayMode = (displayMode + 1) % 4;
+        client.publish("ESP32/irSensor", "true"); // Publish true if human detected
+      } else {
+        client.publish("ESP32/irSensor", "false"); // Publish false if no human detected
+      }
+      previousHumanDetected = humanDetected; // Update the previous state
     }
-  } else {
-    // Display when no human is detected
-    lcd.setCursor(0, 0);
-    lcd.print("No human detected");
-    lcd.setCursor(0, 1);
-    lcd.print("Waiting...");
 
-    // Turn off LEDs, Buzzer, and reset servo
-    digitalWrite(GREEN_LED_PIN, LOW);
-    digitalWrite(RED_LED_PIN, LOW);
-    digitalWrite(BUZZER_PIN, LOW);
-  }
+    if (humanDetected) {
+      unsigned long currentMillis = millis();
+      static int displayMode = 0;
+
+      // Cycle through sensor readings
+      if (currentMillis - previousMillis >= interval) {
+        previousMillis = currentMillis;
+        displaySensorData(displayMode);
+        displayMode = (displayMode + 1) % 4;
+      }
+    } else {
+      // Display when no human is detected
+      lcd.setCursor(0, 0);
+      lcd.print("No human detected");
+      lcd.setCursor(0, 1);
+      lcd.print("Waiting...");
+
+      // Turn off LEDs, Buzzer, and reset servo
+      digitalWrite(GREEN_LED_PIN, LOW);
+      digitalWrite(RED_LED_PIN, LOW);
+      digitalWrite(BUZZER_PIN, LOW);
+    }
   }
 }
