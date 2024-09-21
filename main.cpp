@@ -28,9 +28,9 @@ char ssid[] = "OPPO A9 2020";
 char pass[] = "88888888";
 
 //---- HiveMQ Cloud Broker settings
-const char* mqtt_server = "33c9cc1b359241a4a730c3a84f7222bc.s1.eu.hivemq.cloud";
-const char* mqtt_username = "Maya Mahmoud";
-const char* mqtt_password = "Maya2004";
+const char* mqtt_server = .eu.hivemq.cloud";
+const char* mqtt_username = "Maya";
+const char* mqtt_password = "";
 const int mqtt_port = 8883;
 
 WiFiClientSecure espClient;  
